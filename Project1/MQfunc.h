@@ -7,6 +7,9 @@
 #include "CJsonObject.hpp"
 #include <windows.h>
 #include <cstdio> 
+#include <fstream>
+#include <regex>
+
 
 
 #pragma comment(lib, "Wininet.lib")
@@ -17,22 +20,62 @@ typedef const char* text;
 typedef char* _text;
 typedef long long llong;
 
+class Api
+{
+public:
+	HMODULE  hdll;
+	Api ();
+	~Api ();
 
+	void Api_SendMsgEx (text QQ, int namebat, int type, text group, text Class, text msg, int id);
+	void Api_OutPut (text msg);
 
-void Api_SendMsgEx (text QQ, int namebat, int type, text group, text Class, text msg, int id) {
-	typedef text (*Func)(text,int,int,text,text,text,int);
-	HMODULE  hdll = LoadLibrary ("MyQQApi.DLL");
-	Func func = (Func)GetProcAddress (hdll, "Api_SendMsgEx");
+private:
+	typedef void (*_OutPut)(text);  _OutPut OutPut;
+	typedef void (*_SendMsgEx)(text, int, int, text, text, text, int); _SendMsgEx SendMsgEx;
+	
+};
 
-	if (func == NULL) {
-		MessageBoxA (GetForegroundWindow (), "¶¯Ì¬Á´½Ó¿âÖ¸¶¨ÃüÁî\" Api_SendMsgEx\"²»´æÔÚ", "ÌáÊ¾", 0);
+Api::Api ()
+{
+	
+	 hdll = LoadLibrary (L"MyQQApi.DLL");
+	 SendMsgEx = (_SendMsgEx)GetProcAddress (hdll, "Api_SendMsgEx");
+	 OutPut = (_OutPut)GetProcAddress (hdll, "Api_OutPut");
+}
+
+Api::~Api ()
+{
+	FreeLibrary (hdll);
+}
+
+void Api::Api_SendMsgEx (text QQ, int namebat, int type, text group, text Class, text msg, int id) {
+	
+
+	if (SendMsgEx == NULL) {
+		MessageBoxA (GetForegroundWindow (), "åŠ¨æ€é“¾æ¥åº“æŒ‡å®šå‘½ä»¤\" Api_SendMsgEx\"ä¸å­˜åœ¨", "æç¤º", 0);
 		return ;
 	}
 	else
 	{
-		func (QQ, namebat, type, group, Class, msg, id);
+		SendMsgEx (QQ, namebat, type, group, Class, msg, id);
 	}
 
 }
+void Api::Api_OutPut (text msg) {
 
 
+
+	if (OutPut == NULL) {
+		MessageBoxA (GetForegroundWindow (), "åŠ¨æ€é“¾æ¥åº“æŒ‡å®šå‘½ä»¤\"Api_OutPut\"ä¸å­˜åœ¨", "æç¤º", 0);
+		return;
+	}
+	else
+	{
+		OutPut (msg);
+	}
+
+	return;
+}
+
+Api api;
